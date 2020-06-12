@@ -5,7 +5,7 @@ A simple command line Pomodoro timer.
 
 ### Usage
 
-`go get -u github.com/ihsavru/pomodoro-cli`
+`go get -u github.com/ihsavru/pomodoro`
 
   You can pass the following flags to it:
 

@@ -16,7 +16,7 @@ A simple command line Pomodoro timer.
       -work int
         	Duration of work interval in minutes (default 25)
         	
-**Example:** pomodoro-cli --work 15 --longBreak 10
+**Example:** pomodoro --work 15 --longBreak 10
 
 Press *Ctrl + C* or *q* to quit.
 

@@ -17,15 +17,15 @@ func isLongBreak(pomodoroCount int) bool {
 	return pomodoroCount % 4 == 0
 }
 
-func isWorkOver(secondsPassed int, workDuration int) bool {
+func isWorkOver(secondsPassed , workDuration int) bool {
 	return secondsPassed == workDuration
 }
 
-func isBreakOver(secondsPassed int, breakDuration int) bool {
+func isBreakOver(secondsPassed , breakDuration int) bool {
 	return secondsPassed == breakDuration
 }
 
-func formatLabel(percent int, duration int, secondsPassed int) string {
+func formatLabel(percent , duration , secondsPassed int) string {
 	return fmt.Sprintf(
 		"%v%% (%vm %vs left)",
 		percent,
@@ -96,12 +96,12 @@ func main() {
 
 	f, err := os.Open(os.Getenv("GOPATH") + "/src/github.com/ihsavru/pomodoro-cli/notification.wav")
 	if err != nil {
-		fmt.Println("Uh Oh!")
+		log.Fatalf("failed to load audio file: %v", err)
 	}
 
 	streamer, format, err := wav.Decode(f)
 	if err != nil {
-		fmt.Println("Uh Oh!")
+		log.Fatalf("failed to decode notification.wav: %v", err)
 	}
 
 	buffer := beep.NewBuffer(format)

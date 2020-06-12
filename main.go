@@ -94,7 +94,7 @@ func main() {
 		),
 	)
 
-	f, err := os.Open("notification.wav")
+	f, err := os.Open(os.Getenv("GOPATH") + "/src/github.com/ihsavru/pomodoro-cli/notification.wav")
 	if err != nil {
 		fmt.Println("Uh Oh!")
 	}

@@ -28,9 +28,9 @@ func newPomodoro(flags Flags, ui *Ui, notifier *Notifier) *Pomodoro {
 
 func newFlags(workDuration, shortBreakDuration, longBreakDuration int) Flags {
 	return Flags{
-		workDuration:       5,
-		shortBreakDuration: 5,
-		longBreakDuration:  10,
+		workDuration:       workDuration,
+		shortBreakDuration: shortBreakDuration,
+		longBreakDuration:  longBreakDuration,
 	}
 }
 

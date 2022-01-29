@@ -51,7 +51,7 @@ func (ui *Ui) setLoaderStyle() {
 
 func (ui *Ui) setLoaderData(title string, percent int, label string) {
 	ui.loader.Title = title
-	ui.loader.Percent = 0
+	ui.loader.Percent = percent
 	ui.loader.Label = label
 }
 

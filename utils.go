@@ -16,17 +16,21 @@ import (
 
 func newPomodoro(flags Flags, ui *Ui, notifier *Notifier) *Pomodoro {
 	return &Pomodoro{
-		flags:    flags,
-		ui:       ui,
-		notifier: notifier,
+		flags:        flags,
+		ui:           ui,
+		notifier:     notifier,
+		secondTicker: time.NewTicker(time.Second),
+		status: PomodoroStatus{
+			isWork: true,
+		},
 	}
 }
 
 func newFlags(workDuration, shortBreakDuration, longBreakDuration int) Flags {
 	return Flags{
-		workDuration:       workDuration,
-		shortBreakDuration: shortBreakDuration,
-		longBreakDuration:  longBreakDuration,
+		workDuration:       5,
+		shortBreakDuration: 5,
+		longBreakDuration:  10,
 	}
 }
 
@@ -103,6 +107,10 @@ func isWorkOver(secondsPassed, workDuration int) bool {
 
 func isBreakOver(secondsPassed, breakDuration int) bool {
 	return secondsPassed == breakDuration
+}
+
+func calculatePercentage(secondsPassed, totalSeconds int) int {
+	return secondsPassed / totalSeconds * 100
 }
 
 func formatLabel(percent, duration, secondsPassed int) string {

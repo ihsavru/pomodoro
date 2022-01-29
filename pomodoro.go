@@ -14,63 +14,97 @@ func (p *Pomodoro) drawUi() {
 }
 
 func (p *Pomodoro) startTimer() {
-	isWork := true
-	tickerCount, pomodoroCount := 0, 0
-
 	uiEvents := termui.PollEvents()
-	termui.Render(p.ui.grid)
-	secondTicker := time.NewTicker(time.Second)
+	p.ui.renderGrid()
+	p.secondTicker = time.NewTicker(time.Second)
 
 	for {
 		select {
 		case e := <-uiEvents:
 			switch e.ID {
 			case "q", "<C-c>":
+				// Quit the program
 				return
 			case "r":
-				tickerCount = 0
-				pomodoroCount = 0
-				secondTicker.Stop()
+				// Reset the Pomodoro
+				p.resetStatus()
+				p.secondTicker.Stop()
 				p.ui.setLoaderData(workText, 0, formatLabel(p.ui.loader.Percent, p.flags.workDuration, 0))
 				p.ui.renderGrid()
 				p.notifier.play()
-				secondTicker = time.NewTicker(time.Second)
+				p.secondTicker.Reset(time.Second)
 			case "<Resize>":
+				// Resize UI
 				payload := e.Payload.(termui.Resize)
 				p.ui.resizeGrid(payload.Width, payload.Height)
 			}
-		case <-secondTicker.C:
-			tickerCount++
-			if isWork {
-				p.ui.loader.Percent = (tickerCount * 100) / p.flags.workDuration
-				p.ui.loader.Label = formatLabel(p.ui.loader.Percent, p.flags.workDuration, tickerCount)
-
-				if isWorkOver(tickerCount, p.flags.workDuration) {
-					isWork = false
-					tickerCount = 0
-					pomodoroCount++
-					p.ui.loader.Title = shortBreakText
-					if isLongBreak(pomodoroCount) {
-						p.ui.loader.Title = longBreakText
-					}
-					p.notifier.play()
-				}
-			} else {
-				breakDurationSeconds := p.flags.shortBreakDuration
-				if isLongBreak(pomodoroCount) {
-					breakDurationSeconds = p.flags.longBreakDuration
-				}
-				p.ui.loader.Percent = (tickerCount * 100) / breakDurationSeconds
-				p.ui.loader.Label = formatLabel(p.ui.loader.Percent, breakDurationSeconds, tickerCount)
-
-				if isBreakOver(tickerCount, breakDurationSeconds) {
-					isWork = true
-					tickerCount = 0
-					p.ui.loader.Title = workText
-					p.notifier.play()
-				}
-			}
+		case <-p.secondTicker.C:
+			// Updates the status after every second
+			p.status.tickerCount++
+			p.setStatus()
+			p.updateUi()
 			p.ui.renderGrid()
 		}
 	}
+}
+
+func (p *Pomodoro) setStatus() {
+	switch {
+	case p.status.isWork:
+		if isWorkOver(p.status.tickerCount, p.flags.workDuration) {
+			p.status.isWork = false
+			p.status.pomodoroCount++
+			p.endPomodoro()
+
+			if isLongBreak(p.status.pomodoroCount) {
+				p.status.isLongBreak = true
+				p.status.pomodoroCount = 0
+			} else {
+				// Short Break
+				p.status.isShortBreak = true
+			}
+		}
+	case p.status.isShortBreak:
+		if isBreakOver(p.status.tickerCount, p.flags.shortBreakDuration) {
+			p.status.isShortBreak = false
+			p.status.isWork = true
+			p.endPomodoro()
+		}
+	case p.status.isLongBreak:
+		if isBreakOver(p.status.tickerCount, p.flags.longBreakDuration) {
+			p.status.isLongBreak = false
+			p.status.isWork = true
+			p.endPomodoro()
+		}
+	}
+}
+
+func (p *Pomodoro) updateUi() {
+	switch {
+	case p.status.isWork:
+		percent := calculatePercentage(p.status.tickerCount, p.flags.workDuration)
+		label := formatLabel(percent, p.flags.workDuration, p.status.tickerCount)
+		p.ui.setLoaderData(workText, percent, label)
+	case p.status.isShortBreak:
+		percent := calculatePercentage(p.status.tickerCount, p.flags.shortBreakDuration)
+		label := formatLabel(percent, p.flags.shortBreakDuration, p.status.tickerCount)
+		p.ui.setLoaderData(shortBreakText, percent, label)
+	case p.status.isLongBreak:
+		percent := calculatePercentage(p.status.tickerCount, p.flags.longBreakDuration)
+		label := formatLabel(percent, p.flags.longBreakDuration, p.status.tickerCount)
+		p.ui.setLoaderData(longBreakText, percent, label)
+	}
+}
+
+func (p *Pomodoro) endPomodoro() {
+	p.notifier.play()
+	p.status.tickerCount = 0
+}
+
+func (p *Pomodoro) resetStatus() {
+	p.status.isWork = true
+	p.status.isLongBreak = false
+	p.status.isShortBreak = false
+	p.status.pomodoroCount = 0
+	p.status.tickerCount = 0
 }

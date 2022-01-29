@@ -1,6 +1,8 @@
 package pomodoro
 
 import (
+	"time"
+
 	"github.com/faiface/beep"
 	termui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
@@ -21,8 +23,15 @@ type Notifier struct {
 	buffer *beep.Buffer
 }
 
+type PomodoroStatus struct {
+	isWork, isShortBreak, isLongBreak bool
+	pomodoroCount, tickerCount        int
+}
+
 type Pomodoro struct {
-	flags    Flags
-	ui       *Ui
-	notifier *Notifier
+	flags        Flags
+	ui           *Ui
+	notifier     *Notifier
+	secondTicker *time.Ticker
+	status       PomodoroStatus
 }

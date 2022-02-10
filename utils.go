@@ -110,7 +110,7 @@ func isBreakOver(secondsPassed, breakDuration int) bool {
 }
 
 func calculatePercentage(secondsPassed, totalSeconds int) int {
-	return secondsPassed / totalSeconds * 100
+	return (secondsPassed * 100) / totalSeconds
 }
 
 func formatLabel(percent, duration, secondsPassed int) string {
